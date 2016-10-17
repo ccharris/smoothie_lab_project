@@ -22,6 +22,7 @@ public class Main {
 			}
 			firstThrough = false;
 		}
+		System.out.println("Thanks for visiting the Smoothie Shop! Enjoy!");
 	}
 
 }

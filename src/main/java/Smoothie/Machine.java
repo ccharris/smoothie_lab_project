@@ -94,9 +94,6 @@ public class Machine {
 	}
 
 	public String getSmoothieChoice(HashMap<String, ArrayList<Food>> ingredients) {
-
-		
-
 			String choiceName;
 			while (true) {
 				System.out.println("\nWhich smoothie would you like to choose?");
@@ -120,13 +117,29 @@ public class Machine {
 			}
 			String recipe = "";
 			if (choiceName.equals("protein")) {
+				if((ingredQuants.get("protein") != 0) && (ingredQuants.get("strawberry") != 0) && (ingredQuants.get("banana") != 0)){
 				recipe = printRecipeInstruction(ingredients.get("Protein Power"));
+				} else {
+					System.out.println("Insufficient quantities to make that smoothie.");
+				}
 			} else if (choiceName.equals("kiwi")) {
+				if((ingredQuants.get("kiwi") != 0) && (ingredQuants.get("strawberry") != 0)){
 				recipe = printRecipeInstruction(ingredients.get("Kiwi Strawberry"));
+				} else {
+					System.out.println("Insufficient quantities to make that smoothie.");
+				}
 			} else if (choiceName.equals("banana")) {
+				if((ingredQuants.get("banana") != 0) && (ingredQuants.get("strawberry") != 0)){
 				recipe = printRecipeInstruction(ingredients.get("Strawberry Banana"));
+				} else {
+					System.out.println("Insufficient quantities to make that smoothie.");
+				}
 			} else if (choiceName.equals("green")) {
+				if((ingredQuants.get("spinach") != 0) && (ingredQuants.get("blueberry") != 0) && (ingredQuants.get("strawberry") != 0)){
 				recipe = printRecipeInstruction(ingredients.get("Green Blast"));
+				} else {
+					System.out.println("Insufficient quantities to make that smoothie.");
+				}
 			}
 
 			return recipe;
