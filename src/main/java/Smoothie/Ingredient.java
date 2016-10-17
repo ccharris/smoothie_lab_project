@@ -77,8 +77,11 @@ public class Ingredient implements Food{
 
 	@Override
 	public String toString() {
-		return "Ingredient [" + (name != null ? "name=" + name + ", " : "") + "quantity=" + quantity + ", isOrganic="
-				+ isOrganic + "]";
+		if (name != null){
+			return name;
+		} else{
+			return "error";
+		}
 	}
 
 

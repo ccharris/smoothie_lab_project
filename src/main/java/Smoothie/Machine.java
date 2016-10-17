@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,28 +17,7 @@ public class Machine {
 	public Machine() {
 
 	}
-
-	public ArrayList<String> getIngredients() {
-		ArrayList<String> ingredients = new ArrayList<String>();
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader("src/main/resources/ingredients.csv"));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				System.out.println(line);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return ingredients;
-	}
-
+	
 	public HashMap<String, ArrayList<Food>> loadRecipes() {
 		final File recipeFile = new File("src/main/resources/recipes.csv");
 		HashMap<String, ArrayList<Food>> recipeMap = new HashMap<String, ArrayList<Food>>();
@@ -46,7 +26,7 @@ public class Machine {
 			recipeStream = new FileInputStream(recipeFile);
 
 		} catch (FileNotFoundException e) {
-			System.out.println("Couldn't fine the file: " + recipeFile.getAbsolutePath());
+			System.out.println("Couldn't find the file: " + recipeFile.getAbsolutePath());
 			return recipeMap;
 		}
 
@@ -61,6 +41,145 @@ public class Machine {
 			}
 		}
 		return recipeMap;
+	}
+
+	public HashMap<String, Double> getIngredients() {
+		HashMap<String, Double> ingredients = new HashMap<String, Double>();
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader("src/main/resources/ingredients.csv"));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] items = line.split(":");
+				double d = Double.parseDouble(items[1]);
+				String ingred = items[0];
+				ingredients.put(ingred, d);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return ingredients;
+	}
+
+	public String printListIngredients(HashMap<String, Double> ingredients) {
+		ArrayList<String> allIngredients = new ArrayList<String>();
+		ArrayList<Double> ingredNums = new ArrayList<Double>();
+		for(String key : ingredients.keySet()){
+			allIngredients.add(key);
+			ingredNums.add(ingredients.get(key));
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("Our Ingredients:\n");
+		for (int i = 0; i < allIngredients.size(); i++) {
+			if (i == 2 || i == 5 || i == 8 || i == 11 || i == 14 || i == 17 || i == 20) {
+				sb.append(allIngredients.get(i)).append(": ").append(ingredNums.get(i)).append(" in stock.");
+			} else if (i % 3 != 0) {
+				sb.append(allIngredients.get(i)).append(": ").append(ingredNums.get(i)).append(" in stock.");
+				sb.append(" | ");
+			} else if (i % 3 == 0) {
+				sb.append("\n");
+				sb.append(allIngredients.get(i)).append(": ").append(ingredNums.get(i)).append(" in stock.");
+				sb.append(" | ");
+			}
+		}
+		return sb.toString();
+	}
+
+	public String getSmoothieChoice(HashMap<String, ArrayList<Food>> ingredients) {
+		String choiceName;
+		while (true) {
+			Scanner userIn = new Scanner(System.in);
+			System.out.println("Which smoothie would you like to choose?");
+			printRecipes(loadRecipes(), loadPrices());
+			String choice = userIn.nextLine();
+			if (choice.toLowerCase().contains("protein")) {
+				choiceName = "protein";
+				break;
+			} else if (choice.toLowerCase().contains("kiwi")) {
+				choiceName = "kiwi";
+				break;
+			} else if (choice.toLowerCase().contains("banana")) {
+				choiceName = "banana";
+				break;
+			} else if (choice.toLowerCase().contains("green")) {
+				choiceName = "green";
+				break;
+			} else {
+				System.out.println("Please choose one of the following.");
+			}
+		}
+		String recipe = "";
+		if (choiceName.equals("protein")) {
+			recipe = printRecipeInstruction(ingredients.get("Protein Power"));
+		} else if (choiceName.equals("kiwi")) {
+			recipe = printRecipeInstruction(ingredients.get("Kiwi Strawberry"));
+		} else if (choiceName.equals("banana")) {
+			recipe = printRecipeInstruction(ingredients.get("Strawberry Banana"));
+		} else if (choiceName.equals("green")) {
+			recipe = printRecipeInstruction(ingredients.get("Green Blast"));
+		}
+		return recipe;
+	}
+
+	public String printRecipeInstruction(ArrayList<Food> ingredList) {
+		StringBuilder s = new StringBuilder();
+		s.append("Recipe Instructions:");
+		for (Food ingred : ingredList) {
+			if (getPittable().contains(ingred.toString())) {
+				s.append("\n Pit the ").append(ingred).append(",\n Cut the ").append(ingred).append(",\n Add the ")
+						.append(ingred).append(" to the blender.");
+			} else if (getPeelable().contains(ingred.toString())) {
+				s.append("\n Peel the ").append(ingred).append(",\n Cut the ").append(ingred).append(",\n Add the ")
+						.append(ingred).append(" to the blender.");
+			} else if (getOthers().contains(ingred.toString())) {
+				s.append("\n Prepare the ").append(ingred).append(",\n Add the ").append(ingred)
+						.append(" to the blender.");
+			} else {
+				s.append("\n Cut the ").append(ingred).append(",\n Add the ").append(ingred).append(" to the blender.");
+			}
+		}
+		s.append("\n Add ice to the blender and start blending!");
+		return s.toString();
+	}
+
+	public String printRecipes(HashMap<String, ArrayList<Food>> recipeMap, HashMap<String, BigDecimal> prices) {
+		StringBuilder s = new StringBuilder();
+		for (String key : recipeMap.keySet()) {
+			System.out.println(key + ": " + recipeMap.get(key) + " $" + prices.get(key));
+			s.append(key).append(": ").append(recipeMap.get(key)).append(" $").append(prices.get(key));
+		}
+		return s.toString();
+
+	}
+
+	
+	
+	public HashMap<String, BigDecimal> loadPrices(){
+		String name;
+		HashMap<String, BigDecimal> priceList = new HashMap<String, BigDecimal>();
+		try {
+			Scanner s = new Scanner(new File("src/main/resources/smoothiePrices.txt"));
+			while (s.hasNextLine()) {
+				BigDecimal b = new BigDecimal(0.00);
+				String[] items = s.nextLine().split(":");
+				for (int i = 1; i < items.length; i++) {
+					b = new BigDecimal(items[i]);
+				}
+				priceList.put(items[0], b);
+			}
+			s.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		}
+		return priceList;
+		
+		
 	}
 
 	public Food getIngredientParams(String ingredient) {
