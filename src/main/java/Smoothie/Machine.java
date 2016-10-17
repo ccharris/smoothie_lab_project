@@ -17,7 +17,9 @@ public class Machine {
 	public Machine() {
 
 	}
-	
+	Scanner userIn = new Scanner(System.in);
+	public HashMap<String, Double> ingredQuants = new HashMap<String, Double>();
+
 	public HashMap<String, ArrayList<Food>> loadRecipes() {
 		final File recipeFile = new File("src/main/resources/recipes.csv");
 		HashMap<String, ArrayList<Food>> recipeMap = new HashMap<String, ArrayList<Food>>();
@@ -30,7 +32,7 @@ public class Machine {
 			return recipeMap;
 		}
 
-		try (Scanner input = new Scanner(recipeStream)) {
+		Scanner input = new Scanner(recipeStream);
 			while (input.hasNextLine()) {
 				String[] items = input.nextLine().split(",");
 				ArrayList<Food> recipes = new ArrayList<>();
@@ -38,13 +40,11 @@ public class Machine {
 					recipes.add(getIngredientParams(items[i]));
 				}
 				recipeMap.put(items[0], recipes);
-			}
 		}
 		return recipeMap;
 	}
 
 	public HashMap<String, Double> getIngredients() {
-		HashMap<String, Double> ingredients = new HashMap<String, Double>();
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader("src/main/resources/ingredients.csv"));
@@ -52,25 +52,27 @@ public class Machine {
 			while ((line = reader.readLine()) != null) {
 				String[] items = line.split(":");
 				double d = Double.parseDouble(items[1]);
+
 				String ingred = items[0];
-				ingredients.put(ingred, d);
+				ingredQuants.put(ingred, d);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
-		return ingredients;
+//		} finally {
+//			try {
+//				reader.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		return ingredQuants;
 	}
 
 	public String printListIngredients(HashMap<String, Double> ingredients) {
 		ArrayList<String> allIngredients = new ArrayList<String>();
 		ArrayList<Double> ingredNums = new ArrayList<Double>();
-		for(String key : ingredients.keySet()){
+		for (String key : ingredients.keySet()) {
 			allIngredients.add(key);
 			ingredNums.add(ingredients.get(key));
 		}
@@ -92,45 +94,50 @@ public class Machine {
 	}
 
 	public String getSmoothieChoice(HashMap<String, ArrayList<Food>> ingredients) {
-		String choiceName;
-		while (true) {
-			Scanner userIn = new Scanner(System.in);
-			System.out.println("Which smoothie would you like to choose?");
-			printRecipes(loadRecipes(), loadPrices());
-			String choice = userIn.nextLine();
-			if (choice.toLowerCase().contains("protein")) {
-				choiceName = "protein";
-				break;
-			} else if (choice.toLowerCase().contains("kiwi")) {
-				choiceName = "kiwi";
-				break;
-			} else if (choice.toLowerCase().contains("banana")) {
-				choiceName = "banana";
-				break;
-			} else if (choice.toLowerCase().contains("green")) {
-				choiceName = "green";
-				break;
-			} else {
-				System.out.println("Please choose one of the following.");
+
+		
+
+			String choiceName;
+			while (true) {
+				System.out.println("\nWhich smoothie would you like to choose?");
+				printRecipes(loadRecipes(), loadPrices());
+				String choice = userIn.nextLine();
+				if (choice.toLowerCase().contains("protein")) {
+					choiceName = "protein";
+					break;
+				} else if (choice.toLowerCase().contains("kiwi")) {
+					choiceName = "kiwi";
+					break;
+				} else if (choice.toLowerCase().contains("banana")) {
+					choiceName = "banana";
+					break;
+				} else if (choice.toLowerCase().contains("green")) {
+					choiceName = "green";
+					break;
+				} else {
+					System.out.println("Please choose one of the following.");
+				}
 			}
-		}
-		String recipe = "";
-		if (choiceName.equals("protein")) {
-			recipe = printRecipeInstruction(ingredients.get("Protein Power"));
-		} else if (choiceName.equals("kiwi")) {
-			recipe = printRecipeInstruction(ingredients.get("Kiwi Strawberry"));
-		} else if (choiceName.equals("banana")) {
-			recipe = printRecipeInstruction(ingredients.get("Strawberry Banana"));
-		} else if (choiceName.equals("green")) {
-			recipe = printRecipeInstruction(ingredients.get("Green Blast"));
-		}
-		return recipe;
+			String recipe = "";
+			if (choiceName.equals("protein")) {
+				recipe = printRecipeInstruction(ingredients.get("Protein Power"));
+			} else if (choiceName.equals("kiwi")) {
+				recipe = printRecipeInstruction(ingredients.get("Kiwi Strawberry"));
+			} else if (choiceName.equals("banana")) {
+				recipe = printRecipeInstruction(ingredients.get("Strawberry Banana"));
+			} else if (choiceName.equals("green")) {
+				recipe = printRecipeInstruction(ingredients.get("Green Blast"));
+			}
+
+			return recipe;
+		
 	}
 
 	public String printRecipeInstruction(ArrayList<Food> ingredList) {
 		StringBuilder s = new StringBuilder();
 		s.append("Recipe Instructions:");
 		for (Food ingred : ingredList) {
+			ingredQuants.put(ingred.toString(), ingredQuants.get(ingred.toString()) - 1);
 			if (getPittable().contains(ingred.toString())) {
 				s.append("\n Pit the ").append(ingred).append(",\n Cut the ").append(ingred).append(",\n Add the ")
 						.append(ingred).append(" to the blender.");
@@ -158,9 +165,7 @@ public class Machine {
 
 	}
 
-	
-	
-	public HashMap<String, BigDecimal> loadPrices(){
+	public HashMap<String, BigDecimal> loadPrices() {
 		String name;
 		HashMap<String, BigDecimal> priceList = new HashMap<String, BigDecimal>();
 		try {
@@ -173,13 +178,11 @@ public class Machine {
 				}
 				priceList.put(items[0], b);
 			}
-			s.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		}
 		return priceList;
-		
-		
+
 	}
 
 	public Food getIngredientParams(String ingredient) {
@@ -195,7 +198,6 @@ public class Machine {
 			while (s.hasNextLine()) {
 				pittable.add(s.nextLine());
 			}
-			s.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		}
@@ -209,7 +211,6 @@ public class Machine {
 			while (s.hasNextLine()) {
 				peelable.add(s.nextLine());
 			}
-			s.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		}
@@ -223,11 +224,12 @@ public class Machine {
 			while (s.hasNextLine()) {
 				others.add(s.nextLine());
 			}
-			s.close();
+
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
 		}
 		return others;
 	}
+
 
 }
