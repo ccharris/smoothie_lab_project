@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = "Smoothie.Main"
+
+jar {
+    baseName = 'java202'
+    version =  '0.1.6'
+}
+
+eclipse {
+    project.natures 'org.eclipse.buildship.core.gradleprojectnature'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    runtime 'org.apache.commons:commons-lang3:3.4'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+run {
+   standardInput = System.in
+}
