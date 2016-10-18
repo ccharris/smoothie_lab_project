@@ -1,4 +1,30 @@
-Green Blast:5.00
-Kiwi Strawberry:4.00
-Strawberry Banana:4.00
-Protein Power:5.50
+Strawberry Banana Fun:5.00
+Kiwi Strawberry Fusion:4.00
+Green Blast Off:5.50
+Protein Power Hour:5.50
+Awesomesauce Smoothie:5.00
+Delish Greens:5.50
+BanApple:4.50
+PeachMelon:4.50
+Berry Bonanza:4.50
+Awesome Kiwasome:5.00
+Aloha Pineapple:5.00
+Banana Berry Fantastic:4.50
+Caribbean Passion:5.00
+Chili Man Mango:5.00
+Mango AGoGo:5.00
+Razzmatazz:4.00
+Strawberries Wild:4.00
+Strawberry Surfer:4.00
+Amazingreen:6.00
+Orangarrot:5.00
+Kaleribbean:5.50
+PB Chocolove:5.50
+PB Proteinana:5.50
+Chocotien:5.50
+Protein Berry Workout:5.00
+AppleGreens:5.00
+GreenNGo:5.00
+MmBop:4.50
+Citrusy Baby:6.00
+Plain Jane:4.00
