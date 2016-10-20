@@ -13,9 +13,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class Machine {
 	public Machine() {
@@ -121,20 +124,29 @@ public class Machine {
 	public String selectRecipe() {
 		String confirm = "";
 		while (true) {
-			System.out.println("\nWhich smoothie would you like to choose? Press b to go back");
-			printRecipes(loadRecipes(), loadPrices());
+			System.out.println("\nWhich smoothie would you like to choose? Please enter the number of your choice. \nPress b to go back, press r to view recipes.");
 			String choice = userIn.nextLine();
-			if (choice.toLowerCase().equals("b")) {
+			if(choice.equals("r")){
+				setPage();
+				System.out.println("\nWhich smoothie would you like to choose? Please enter the number of your choice. \nPress b to go back, press r to view recipes.");
+				choice = userIn.nextLine();
+			}
+			int choiceNum = 0;
+			try {
+				choiceNum = Integer.parseInt(choice);
+			} catch (NumberFormatException e){
 				break;
-			} else if(loadRecipes().get(choice)!= null){
-				if (canAdd(choice)){
-					choicesList.add(choice);
-					subtractIngred(choice);
-					confirm = ("Okay, added smoothie " + choice + "!");
+			}
+			
+			if (loadNumbered().get(choiceNum) != null) {
+				if (canAdd(loadNumbered().get(choiceNum))) {
+					choicesList.add(loadNumbered().get(choiceNum));
+					subtractIngred(loadNumbered().get(choiceNum));
+					confirm = ("Okay, added smoothie " + loadNumbered().get(choiceNum) + "!");
+					priceTotal = (priceTotal.add(loadPrices().get(loadNumbered().get(choiceNum))));
 					break;
 				}
-			} 
-			else {
+			} else {
 				System.out.println("Please choose one of the following.");
 			}
 		}
@@ -149,7 +161,6 @@ public class Machine {
 			if (choice != null) {
 				if (canMake(choice)) {
 					recipe = (recipe + "Now making " + choice + "\n" + printRecipeInstruction(ingredients.get(choice)));
-					priceTotal = (priceTotal.add(loadPrices().get(choice)));
 					for (Entry<String, Double> entry : ingredQuants.entrySet()) {
 						ingredQuantsListBeforeCheckout.put(entry.getKey(), (Double) entry.getValue());
 					}
@@ -207,29 +218,94 @@ public class Machine {
 				s.append("\n Cut the ").append(ingred).append(",\n Add the ").append(ingred).append(" to the blender.");
 			}
 		}
-		s.append("\n Add the ice to the blender and start blending!");
+		s.append("\n Add a scoop of ice to the blender and start blending!");
 		return s.toString();
 	}
 
 	// takes recipes and prices and prints out each recipe and their prices.
-	public String printRecipes(HashMap<String, ArrayList<Food>> recipeMap, HashMap<String, BigDecimal> prices) {
+	private String listOne = "";
+	private String listTwo = "";
+	private String listThree = "";
+	private int listCounter = 1;
+	public String correctPage(){
+		if(listCounter == 1){
+			return listOne;
+		} else if(listCounter == 2){
+			return listTwo;
+		} else if(listCounter == 3){
+			return listThree;
+		}
+		return listOne;
+	}
+	public void setPage(){
+		while(true){
+		System.out.println(correctPage());
+		System.out.println("Press 1, 2, or 3 for which recipe page you would like to view."
+				+ "\nPress b, or any non-number to exit browsing recipes.");
+		String count = userIn.nextLine();
+		int countNum = 1;
+		try {
+			countNum = Integer.parseInt(count);
+		} catch (NumberFormatException e){
+			break;
+		}
+		if(countNum < 4 && countNum > 0){
+		 listCounter = countNum;
+		} else {
+			System.out.println("Must enter 1 through 3");
+		}
+		}
+	}
+
+	public void printRecipes(HashMap<String, ArrayList<Food>> recipeMap, HashMap<String, BigDecimal> prices) {
 		StringBuilder s = new StringBuilder();
-		for (Entry<String, ArrayList<Food>> entry : recipeMap.entrySet()) {
+		StringBuilder t = new StringBuilder();
+		StringBuilder u = new StringBuilder();
+
+		Map<String, ArrayList<Food>> sortedMap = new TreeMap<String, ArrayList<Food>>(recipeMap);
+		for (Entry<String, ArrayList<Food>> entry : sortedMap.entrySet()) {
 			String key = entry.getKey();
-			System.out.println("\n" + key + ": " + recipeMap.get(key) + " $" + prices.get(key));
-			s.append("\n").append(key).append(": ").append(recipeMap.get(key)).append(" $").append(prices.get(key));
-			for (Food food : entry.getValue()) {
-				if (ingredQuants.get(food.toString()) == 0) {
-					System.out.println("Insufficient Quantities of " + food + " for this smoothie.");
-				} else {
-					System.out.print(food + " #: " + ingredQuants.get(food.toString()) + " ");
-					s.append(food).append(" number in stock: ").append(ingredQuants.get(food.toString()));
+			int index = 0;
+			for (Entry<Integer, String> entryTwo : loadNumbered().entrySet()) {
+				if (Objects.equals(key, entryTwo.getValue())) {
+					index = entryTwo.getKey();
+				}
+			}
+			if (index <= 10) {
+				s.append("\n").append(index).append(") ").append(key).append(": ").append(recipeMap.get(key))
+						.append(" $").append(prices.get(key)).append("\n");
+				for (Food food : entry.getValue()) {
+					if (ingredQuants.get(food.toString()) == 0) {
+						s.append("Insufficient Quantities of " + food + " for this smoothie.");
+					} else {
+						s.append(" ").append(food).append(" number in stock: ").append(ingredQuants.get(food.toString()));
+					}
+				}
+			} else if (index <= 20 && index > 10) {
+				t.append("\n").append(index).append(") ").append(key).append(": ").append(recipeMap.get(key))
+						.append(" $").append(prices.get(key)).append("\n");
+				for (Food food : entry.getValue()) {
+					if (ingredQuants.get(food.toString()) == 0) {
+						t.append("Insufficient Quantities of " + food + " for this smoothie.");
+					} else {
+						t.append(" ").append(food).append(" number in stock: ").append(ingredQuants.get(food.toString()));
+					}
+				}
+			} else if (index <= 30 && index > 20) {
+				u.append("\n").append(index).append(") ").append(key).append(": ").append(recipeMap.get(key))
+						.append(" $").append(prices.get(key)).append("\n");
+				for (Food food : entry.getValue()) {
+					if (ingredQuants.get(food.toString()) == 0) {
+						u.append("Insufficient Quantities of " + food + " for this smoothie.");
+					} else {
+						u.append(" ").append(food).append(" number in stock: ").append(ingredQuants.get(food.toString()));
+					}
 				}
 			}
 		}
-
-		return s.toString();
-
+		listOne = s.toString();
+		listTwo = t.toString();
+		listThree = u.toString();
 	}
 
 	// load prices from a file
@@ -250,6 +326,30 @@ public class Machine {
 			System.out.println("File not found");
 		}
 		return priceList;
+
+	}
+
+	public HashMap<Integer, String> loadNumbered() {
+		String name;
+		HashMap<Integer, String> numList = new HashMap<Integer, String>();
+		try {
+			Scanner s = new Scanner(new File("src/main/resources/numberedSmoothies.txt"));
+			while (s.hasNextLine()) {
+				int num = 0;
+				String str = "";
+				String[] items = s.nextLine().split(":");
+				try {
+					num = Integer.parseInt(items[0]);
+				} catch (NumberFormatException e) {
+					System.out.println("Fix your file, a number is not a number in it.");
+				}
+				str = items[1];
+				numList.put(num, str);
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		}
+		return numList;
 
 	}
 
@@ -313,7 +413,7 @@ public class Machine {
 		int choice = 0;
 		Scanner menuIn = new Scanner(System.in);
 		while (true) {
-			System.out.println("What would you like to do?" + "\n1)Browse Ingredients" + "\n2)Browse Recipes"
+			System.out.println("\nWhat would you like to do?" + "\n1)Browse Ingredients" + "\n2)Browse Recipes"
 					+ "\n3)Choose Smoothie" + "\n4)Make Smoothie(s)" + "\n5)View Cart" + "\n6)Quit");
 			String userMenuChoice = menuIn.nextLine();
 			try {
@@ -351,17 +451,21 @@ public class Machine {
 				System.out.println("Which smoothie would you like to modify?");
 				String smoothChoice = userIn.nextLine();
 				if (choicesList.contains(smoothChoice)) {
-					System.out.println("How make of " + smoothChoice + " would you like to have in your cart?");
+					System.out.println("How many of " + smoothChoice + " would you like to have in your cart?");
 					Scanner numIn = new Scanner(System.in);
 					int num = numIn.nextInt();
 					System.out.println("Okay, changing quantity of " + smoothChoice + " to " + num + ".");
 					for (String cho : choicesList) {
+
 						if (!cho.contains(smoothChoice)) {
 							choicesCopy.add(cho);
+						} else if (cho.equals(smoothChoice)) {
+							priceTotal = (priceTotal.subtract(loadPrices().get(smoothChoice)));
 						}
 					}
 					for (int i = 1; i <= num; i++) {
 						choicesCopy.add(smoothChoice);
+						priceTotal = (priceTotal.add(loadPrices().get(smoothChoice)));
 					}
 					break;
 				} else {
@@ -375,6 +479,8 @@ public class Machine {
 					for (String cho : choicesList) {
 						if (!cho.contains(choose)) {
 							choicesCopy.add(cho);
+						} else if (cho.contains(choose)) {
+							priceTotal = (priceTotal.subtract(loadPrices().get(choose)));
 						}
 					}
 					break;
@@ -382,8 +488,9 @@ public class Machine {
 					System.out.println("Sorry that choice is not valid.");
 				}
 			}
+			choicesList = choicesCopy;
 		}
-		choicesList = choicesCopy;
+		
 	}
 
 }

@@ -9,6 +9,7 @@ public class Main {
 		machine.getIngredients();
 		machine.createOriginalList();
 		machine.loadPrices();
+		machine.printRecipes(machine.loadRecipes(), machine.loadPrices());
 		while (smoothieOpen) {
 			int response = machine.displayMenuOptions();
 			if (response == 1) {
@@ -16,8 +17,10 @@ public class Main {
 			}
 			if (response == 2) {
 				machine.viewRecipes();
+				machine.setPage();
 			}
 			if (response == 3) {
+				machine.setPage();
 				System.out.println(machine.selectRecipe());
 			}
 			if (response == 4) {
